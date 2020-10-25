@@ -20,6 +20,9 @@
  *   THE SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2015-2019 Alibaba Group Holding Limited
+ */
 
 #ifndef __RWS_MEMORY_H__
 #define __RWS_MEMORY_H__ 1

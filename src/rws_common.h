@@ -20,11 +20,27 @@
  *   THE SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2015-2019 Alibaba Group Holding Limited
+ */
 
 #ifndef __RWS_COMMON_H__
 #define __RWS_COMMON_H__ 1
 
 #include <stdio.h>
+
+//#define RWS_SSL_ENABLE
+//#define RWS_DEBUG_ENABLE
+
+#if defined(RWS_DEBUG_ENABLE)
+#define RWS_DBG(format, arg...)  fprintf(stdout, format, ##arg)
+#define RWS_WRN(format, arg...)  fprintf(stdout, format, ##arg)
+#define RWS_ERR(format, arg...)  fprintf(stderr, format, ##arg)
+#else
+#define RWS_DBG(format, arg...)
+#define RWS_WRN(format, arg...)  fprintf(stdout, format, ##arg)
+#define RWS_ERR(format, arg...)  fprintf(stderr, format, ##arg)
+#endif
 
 /* check os */
 /* gcc -dM -E - < /dev/null */

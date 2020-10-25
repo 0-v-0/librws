@@ -20,6 +20,9 @@
  *   THE SOFTWARE.
  */
 
+/**
+ * Copyright (C) 2015-2019 Alibaba Group Holding Limited
+ */
 
 #ifndef __LIBRWS_H__
 #define __LIBRWS_H__ 1
@@ -88,6 +91,16 @@
 // types
 
 /**
+ @brief Binary type.
+ */
+typedef enum {
+    rws_binary_start = 0,
+    rws_binary_continue,
+    rws_binary_finish
+} rws_binary;
+
+
+/**
  @brief Boolean type as unsigned byte type.
  */
 typedef unsigned char rws_bool;
@@ -114,25 +127,6 @@ typedef struct rws_error_struct * rws_error;
 
 
 /**
- @brief Mutex object handle.
- */
-typedef rws_handle rws_mutex;
-
-
-/**
- @brief Thread object handle.
- */
-typedef struct rws_thread_struct * rws_thread;
-
-
-/**
- @brief Callback type of thread function.
- @param user_object User object provided during thread creation.
- */
-typedef void (*rws_thread_funct)(void * user_object);
-
-
-/**
  @brief Callback type of socket object.
  @param socket Socket object.
  */
@@ -145,7 +139,7 @@ typedef void (*rws_on_socket)(rws_socket socket);
  @param text Pointer to reseived text.
  @param length Received text lenght without null terminated char.
  */
-typedef void (*rws_on_socket_recvd_text)(rws_socket socket, const char * text, const unsigned int length);
+typedef void (*rws_on_socket_recvd_text)(rws_socket socket, const char * text, const unsigned int length, rws_bool is_finished);
 
 
 /**
@@ -154,7 +148,24 @@ typedef void (*rws_on_socket_recvd_text)(rws_socket socket, const char * text, c
  @param data Received binary data.
  @param length Received binary data lenght.
  */
-typedef void (*rws_on_socket_recvd_bin)(rws_socket socket, const void * data, const unsigned int length);
+typedef void (*rws_on_socket_recvd_bin)(rws_socket socket, const void * data, const unsigned int length, rws_bool is_finished);
+
+
+/**
+ * Callback type on socket receive pong.
+ *
+ * @param[in]  socket  Socket object.
+ *
+ * @return none
+ */
+typedef void (*rws_on_socket_recvd_pong)(rws_socket socket);
+
+
+/**
+ @brief Callback type on socket send ping.
+ @param[in]  socket  Socket object.
+ */
+typedef void (*rws_on_socket_send_ping)(rws_socket socket);
 
 
 // socket
@@ -179,10 +190,10 @@ RWS_API(rws_socket) rws_socket_create(void);
  @endcode
  */
 RWS_API(void) rws_socket_set_url(rws_socket socket,
-								 const char * scheme,
-								 const char * host,
-								 const int port,
-								 const char * path);
+                                 const char * scheme,
+                                 const char * host,
+                                 const int port,
+                                 const char * path);
 
 /**
  @brief Set socket connect URL scheme string.
@@ -263,11 +274,33 @@ RWS_API(const char *) rws_socket_get_path(rws_socket socket);
 
 
 /**
+ @brief Set socket connect Sec-WebSocket-Protocol field.
+ @param socket Socket object.
+ @param Sec-WebSocket-Protocol.
+  rws_socket_set_protocol(socket, "echo-protocol")
+  rws_socket_set_protocol(socket, "chat, superchat")
+ @return none
+ */
+RWS_API(void) rws_socket_set_protocol(rws_socket socket, const char * protocol);
+
+
+/**
  @brief Get socket last error object handle.
  @param socket Socket object.
  @return Last error object handle or null if no error.
  */
 RWS_API(rws_error) rws_socket_get_error(rws_socket socket);
+
+
+#ifdef RWS_SSL_ENABLE
+/**
+ @briefSet server certificate for ssl connection.
+ @param socket           Socket object.
+ @param server_cert      Server certificate.
+ @param server_cert_len  The length of the server certificate caculated by sizeof
+ */
+RWS_API(void) rws_socket_set_server_cert(rws_socket socket, const char *server_cert, int server_cert_len);
+#endif
 
 
 /**
@@ -309,6 +342,23 @@ RWS_API(rws_bool) rws_socket_send_text(rws_socket socket, const char * text);
 
 
 /**
+ @brief Send binary to connect socket.
+ @param socket  Socket object.
+ @param bin     Binary for sending.
+ @return rws_true - socket and text exists and placed to send queue, otherwice rws_false.
+ */
+RWS_API(rws_bool) rws_socket_send_bin(rws_socket socket, const char *bin, size_t len, rws_binary type);
+
+
+/**
+ @brief Send ping async to connect socket.
+ @param socket  Socket object.
+ @return rws_true - send ping success, otherwice rws_false
+ */
+RWS_API(rws_bool) rws_socket_send_ping(rws_socket socket);
+
+
+/**
  @brief Set socket user defined object pointer for identificating socket object.
  @param socket Socket object.
  @param user_object Void pointer to user object.
@@ -334,6 +384,12 @@ RWS_API(void) rws_socket_set_on_received_text(rws_socket socket, rws_on_socket_r
 
 
 RWS_API(void) rws_socket_set_on_received_bin(rws_socket socket, rws_on_socket_recvd_bin callback);
+
+
+RWS_API(void) rws_socket_set_on_received_pong(rws_socket socket, rws_on_socket_recvd_pong callback);
+
+
+RWS_API(void) rws_socket_set_on_send_ping(rws_socket socket, rws_on_socket_send_ping callback);
 
 
 // error
@@ -376,45 +432,5 @@ RWS_API(int) rws_error_get_http_error(rws_error error);
  */
 RWS_API(const char *) rws_error_get_description(rws_error error);
 
-
-// mutex
-
-/**
- @brief Creates recursive mutex object.
- */
-RWS_API(rws_mutex) rws_mutex_create_recursive(void);
-
-
-/**
- @brief Lock mutex object.
- */
-RWS_API(void) rws_mutex_lock(rws_mutex mutex);
-
-
-/**
- @brief Unlock mutex object.
- */
-RWS_API(void) rws_mutex_unlock(rws_mutex mutex);
-
-
-
-/**
- @brief Unlock mutex object.
- */
-RWS_API(void) rws_mutex_delete(rws_mutex mutex);
-
-
-// thread
-
-/**
- @brief Create thread object that start immidiatelly.
- */
-RWS_API(rws_thread) rws_thread_create(rws_thread_funct thread_function, void * user_object);
-
-
-/**
- @brief Pause current thread for a number of milliseconds.
- */
-RWS_API(void) rws_thread_sleep(const unsigned int millisec);
 
 #endif

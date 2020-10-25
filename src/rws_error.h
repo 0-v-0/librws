@@ -20,6 +20,9 @@
  *   THE SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2015-2019 Alibaba Group Holding Limited
+ */
 
 #ifndef __RWS_ERROR_H__
 #define __RWS_ERROR_H__ 1
@@ -27,9 +30,9 @@
 #include "rws_string.h"
 
 struct rws_error_struct {
-	int code;
-	int http_error;
-	char * description;
+    int code;
+    int http_error;
+    char * description;
 };
 
 rws_error rws_error_create(void);

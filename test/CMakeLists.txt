@@ -29,7 +29,7 @@ link_directories(${PROJECT_BINARY_DIR})
 remove_definitions(-DCMAKE_BUILD)
 
 if (RWS_OPT_APPVEYOR_CI)
-	add_definitions(-DRWS_APPVEYOR_CI)
+    add_definitions(-DRWS_APPVEYOR_CI)
 endif()
 
 add_executable(test_librws_creation test_librws_creation.c)
@@ -45,13 +45,13 @@ add_test(test_librws_socket_get_set test_librws_socket_get_set)
 
 
 if(RWS_HAVE_PTHREAD_H)
-	target_link_libraries(test_librws_creation pthread)
-	target_link_libraries(test_librws_socket_get_set pthread)
+    target_link_libraries(test_librws_creation pthread)
+    target_link_libraries(test_librws_socket_get_set pthread)
 endif(RWS_HAVE_PTHREAD_H)
 
 if(MINGW)
-	target_link_libraries(test_librws_creation ws2_32)
-	target_link_libraries(test_librws_socket_get_set ws2_32)
+    target_link_libraries(test_librws_creation ws2_32)
+    target_link_libraries(test_librws_socket_get_set ws2_32)
 endif(MINGW)
 
 

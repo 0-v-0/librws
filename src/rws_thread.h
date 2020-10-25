@@ -20,12 +20,72 @@
  *   THE SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2015-2019 Alibaba Group Holding Limited
+ */
 
 #ifndef __RWS_THREAD_H__
 #define __RWS_THREAD_H__ 1
 
 #include <stdio.h>
 
+typedef rws_handle _rws_mutex;
+
+typedef rws_handle _rws_cond;
+
+typedef struct rws_thread_struct * _rws_thread;
+
+typedef void (*_rws_thread_funct)(void * user_object);
+
+/**
+ @brief Create thread object that start immidiatelly.
+ */
+_rws_thread rws_thread_create(_rws_thread_funct thread_function, void * user_object);
+
+/**
+ @brief Creates recursive mutex object.
+ */
+_rws_mutex rws_mutex_create_recursive(void);
+
+/**
+ @brief Lock mutex object.
+ */
+void rws_mutex_lock(_rws_mutex mutex);
+
+/**
+ @brief Unlock mutex object.
+ */
+void rws_mutex_unlock(_rws_mutex mutex);
+
+/**
+ @brief Release mutex object.
+ */
+void rws_mutex_delete(_rws_mutex mutex);
+
+/**
+ @brief Creates condition object.
+ */
+_rws_cond rws_cond_create(void);
+
+/**
+ @brief Signal a condition
+ */
+void rws_cond_signal(_rws_cond cond);
+
+/**
+ @brief Wait a condition
+ */
+void rws_cond_wait(_rws_cond cond, _rws_mutex mutex);
+
+/**
+ @brief Release a condition
+ */
+void rws_cond_delete(_rws_cond cond);
+
+/**
+ @brief Pause current thread for a number of milliseconds.
+ */
+void rws_thread_sleep(const unsigned int millisec);
 
 #endif
 

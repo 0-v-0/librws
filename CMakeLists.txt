@@ -60,33 +60,33 @@ option(RWS_OPT_APPVEYOR_CI "Build with appveyor ci" OFF)
 # C with -fPIC
 check_c_compiler_flag("-fPIC" WITH_FPIC_C)
 if(WITH_FPIC_C)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif(WITH_FPIC_C)
 
 
 # CXX with -fPIC
 check_cxx_compiler_flag("-fPIC" WITH_FPIC_CXX)
 if(WITH_FPIC_CXX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif(WITH_FPIC_CXX)
 
 
 if(WIN32)
-	add_definitions(-DWIN32)
-	add_definitions(-D_WIN32)
-	set(RWS_OS_WINDOWS 1)
+    add_definitions(-DWIN32)
+    add_definitions(-D_WIN32)
+    set(RWS_OS_WINDOWS 1)
 endif(WIN32)
 
 
 if(MINGW)
-	set(RWS_COMPILER_MINGW 1)
+    set(RWS_COMPILER_MINGW 1)
 endif(MINGW)
 
 
 add_definitions(-DCMAKE_BUILD)
 
 if (RWS_OPT_APPVEYOR_CI)
-	add_definitions(-DRWS_APPVEYOR_CI)
+    add_definitions(-DRWS_APPVEYOR_CI)
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -104,14 +104,14 @@ message(CMAKE_EXTRA_INCLUDE_FILES ": " ${CMAKE_EXTRA_INCLUDE_FILES})
 # To check the size of a primitive type:
 check_type_size("void*" RWS_SIZEOF_VOIDP_T)
 if(RWS_SIZEOF_VOIDP_T AND (NOT RWS_VOIDP_TYPE))
-	set(RWS_VOIDP_TYPE void*)
+    set(RWS_VOIDP_TYPE void*)
 endif()
 
 if(RWS_SIZEOF_VOIDP_T EQUAL 4)
-	set(RWS_32BIT_PLATFORM 1)
+    set(RWS_32BIT_PLATFORM 1)
 endif()
 if(RWS_SIZEOF_VOIDP_T EQUAL 8)
-	set(RWS_64BIT_PLATFORM 1)
+    set(RWS_64BIT_PLATFORM 1)
 endif()
 
 
@@ -128,29 +128,32 @@ endif()
 
 
 if((NOT RWS_HAVE_PTHREAD_H) AND (NOT WIN32))
-	message(FATAL_ERROR "Can't build librws without any threading support")
+    message(FATAL_ERROR "Can't build librws without any threading support")
 endif()
 
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
-	set(CMAKE_INSTALL_LIBDIR lib)
+    set(CMAKE_INSTALL_LIBDIR lib)
 endif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 
 # Now make sure that you the the build directory on your "Include" path when compiling
 include_directories(${PROJECT_BINARY_DIR})
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 
-set(LIBRWS_SOURCES src/rws_common.c
-		src/rws_error.c
-		src/rws_frame.c
-		src/librws.c
-		src/rws_list.c
-		src/rws_memory.c
-		src/rws_socketpriv.c
-		src/rws_socketpub.c
-		src/rws_string.c
-		src/rws_thread.c)
-				
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DRWS_SSL_ENABLE")
+
+set(LIBRWS_SOURCES
+        src/rws_error.c
+        src/rws_frame.c
+        src/rws_list.c
+        src/rws_memory.c
+        src/rws_socketpriv.c
+        src/rws_socketpub.c
+        src/rws_ssl.c
+        src/rws_string.c
+        src/rws_thread.c)
+
 
 set(LIBRWS_HEADERS librws.h)
 
@@ -159,50 +162,50 @@ add_definitions(-DRWS_BUILD)
 
 
 if(RWS_OPT_SHARED)
-	add_library(rws SHARED ${LIBRWS_SOURCES} ${LIBRWS_HEADERS})
-	if(MSVC)
-    	# msvc does not append 'lib' - do it here to have consistent name
-	    set_property(TARGET rws PROPERTY PREFIX "lib")
-	set_property(TARGET rws PROPERTY IMPORT_PREFIX "lib")
-	endif()
+    add_library(rws SHARED ${LIBRWS_SOURCES} ${LIBRWS_HEADERS})
+    if(MSVC)
+        # msvc does not append 'lib' - do it here to have consistent name
+        set_property(TARGET rws PROPERTY PREFIX "lib")
+    set_property(TARGET rws PROPERTY IMPORT_PREFIX "lib")
+    endif()
 endif()
 
 if(RWS_OPT_STATIC)
-	add_library(rws_static STATIC ${LIBRWS_SOURCES} ${LIBRWS_HEADERS})
-	set_property(TARGET rws_static APPEND PROPERTY COMPILE_FLAGS -DLIBRWS_STATIC)
-	if(MSVC)
-    	# msvc does not append 'lib' - do it here to have consistent name
-	    set_target_properties(rws_static PROPERTIES PREFIX "lib")
-	endif()
+    add_library(rws_static STATIC ${LIBRWS_SOURCES} ${LIBRWS_HEADERS})
+    set_property(TARGET rws_static APPEND PROPERTY COMPILE_FLAGS -DLIBRWS_STATIC)
+    if(MSVC)
+        # msvc does not append 'lib' - do it here to have consistent name
+        set_target_properties(rws_static PROPERTIES PREFIX "lib")
+    endif()
 endif()
 
 
 
 if(RWS_HAVE_PTHREAD_H)
-	target_link_libraries(rws pthread)
+    target_link_libraries(rws pthread)
 endif(RWS_HAVE_PTHREAD_H)
 
 
 if(WIN32)
-	target_link_libraries(rws ws2_32)
+    target_link_libraries(rws ws2_32)
 endif(WIN32)
 
 
 install(TARGETS rws
-		DESTINATION lib)
+        DESTINATION lib)
 
 install(TARGETS rws_static
-		DESTINATION lib)
+        DESTINATION lib)
 
 install(FILES librws.h 
-		DESTINATION include)
+        DESTINATION include)
 
 
 if(RWS_OPT_TESTS)
-	enable_testing()
-	add_subdirectory(test)
+    enable_testing()
+    add_subdirectory(test)
 
-	# This must always be last!
-	include(CPack)
+    # This must always be last!
+    include(CPack)
 endif()
 

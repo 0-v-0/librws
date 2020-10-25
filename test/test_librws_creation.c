@@ -43,61 +43,61 @@
 
 static rws_socket _socket = NULL;
 
-static void on_socket_received_text(rws_socket socket, const char * text, const unsigned int length) {
-	char buff[8*1024];
-	memcpy(buff, text, length);
-	buff[length] = 0;
+static void on_socket_received_text(rws_socket socket, const char * text, const unsigned int length, rws_bool is_finished) {
+    char buff[8*1024];
+    memcpy(buff, text, length);
+    buff[length] = 0;
 
-	printf("\nSocket text: %s", text);
+    printf("\nSocket text: %s", text);
 }
 
-static void on_socket_received_bin(rws_socket socket, const void * data, const unsigned int length) {
-	char buff[8*1024];
-	memcpy(buff, data, length);
-	buff[length] = 0;
+static void on_socket_received_bin(rws_socket socket, const void * data, const unsigned int length, rws_bool is_finished) {
+    char buff[8*1024];
+    memcpy(buff, data, length);
+    buff[length] = 0;
 
-	printf("\nSocket bin: <%s>", buff);
+    printf("\nSocket bin: <%s>", buff);
 }
 
 static void on_socket_connected(rws_socket socket) {
-	const char * test_send_text =
-	"{\"version\":\"1.0\",\"supportedConnectionTypes\":[\"websocket\"],\"minimumVersion\":\"1.0\",\"channel\":\"/meta/handshake\"}";
+    const char * test_send_text =
+    "{\"version\":\"1.0\",\"supportedConnectionTypes\":[\"websocket\"],\"minimumVersion\":\"1.0\",\"channel\":\"/meta/handshake\"}";
 
-	printf("\nSocket connected");
+    printf("\nSocket connected");
 
-	rws_socket_send_text(socket, test_send_text);
+    rws_socket_send_text(socket, test_send_text);
 }
 
 static void on_socket_disconnected(rws_socket socket) {
-	rws_error error = rws_socket_get_error(socket);
-	if (error) {
-		printf("\nSocket disconnect with code, error: %i, %s",
-			  rws_error_get_code(error),
-			  rws_error_get_description(error));
-	}
+    rws_error error = rws_socket_get_error(socket);
+    if (error) {
+        printf("\nSocket disconnect with code, error: %i, %s",
+              rws_error_get_code(error),
+              rws_error_get_description(error));
+    }
 }
 
 int main(int argc, char* argv[]) {
-	_socket = rws_socket_create(); // create and store socket handle
-	assert(_socket);
+    _socket = rws_socket_create(); // create and store socket handle
+    assert(_socket);
 
-	rws_socket_set_scheme(_socket, "ws");
-	rws_socket_set_host(_socket, "echo.websocket.org");
-	rws_socket_set_path(_socket, "/");
-	rws_socket_set_port(_socket, 80);
+    rws_socket_set_scheme(_socket, "ws");
+    rws_socket_set_host(_socket, "echo.websocket.org");
+    rws_socket_set_path(_socket, "/");
+    rws_socket_set_port(_socket, 80);
 
-	rws_socket_set_on_disconnected(_socket, &on_socket_disconnected);
-	rws_socket_set_on_connected(_socket, &on_socket_connected);
-	rws_socket_set_on_received_text(_socket, &on_socket_received_text);
-	rws_socket_set_on_received_bin(_socket, &on_socket_received_bin);
+    rws_socket_set_on_disconnected(_socket, &on_socket_disconnected);
+    rws_socket_set_on_connected(_socket, &on_socket_connected);
+    rws_socket_set_on_received_text(_socket, &on_socket_received_text);
+    rws_socket_set_on_received_bin(_socket, &on_socket_received_bin);
 
 #if !defined(RWS_APPVEYOR_CI)
-	// connection denied for client applications
-	rws_socket_connect(_socket);
+    // connection denied for client applications
+    rws_socket_connect(_socket);
 #endif
 
-	// main loop here
+    // main loop here
 
-	return 0;
+    return 0;
 }
 

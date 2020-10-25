@@ -20,6 +20,9 @@
  *   THE SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2015-2019 Alibaba Group Holding Limited
+ */
 
 #ifndef __RWS_STRING_H__
 #define __RWS_STRING_H__ 1

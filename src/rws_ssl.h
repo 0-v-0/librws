@@ -20,7 +20,35 @@
  *   THE SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2015-2019 Alibaba Group Holding Limited
+ */
 
-#include "../librws.h"
+#ifndef __RWS_SSL_H__
+#define __RWS_SSL_H__ 1
 
+#include "rws_common.h"
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#ifdef RWS_SSL_ENABLE
+
+typedef struct _rws_ssl_struct _rws_ssl;
+
+int rws_ssl_connect(rws_socket s);
+
+int rws_ssl_send(rws_socket s, const unsigned char *buf, size_t len);
+
+int rws_ssl_recv(rws_socket s, unsigned char *buf, size_t len);
+
+void rws_ssl_close(rws_socket s);
+
+bool rws_ssl_err_want_read(int error_code);
+
+bool rws_ssl_err_non_fatal(int error_code);
+
+#endif // RWS_SSL_ENABLE
+
+#endif // __RWS_SSL_H__
 
