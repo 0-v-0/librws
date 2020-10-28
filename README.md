@@ -5,7 +5,11 @@
 * 支持 binary 发送
 * 支持分片接收和分片发送
 * 修复内存泄露问题和线程同步问题
-具体请参阅我的提交记录或 https://github.com/alibaba/AliOS-Things/tree/master/components/network/websocket 
+
+具体请参阅我的提交记录：
+https://github.com/sepnic/librws/commit/0460d34231bfbac3a7eccae0e239ec58e86cdab0 
+或 AliOS-Things 提交记录：
+https://github.com/alibaba/AliOS-Things/tree/master/components/network/websocket 
 
 如果要适配到其他平台，请注意如下几个文件:
 * rws_thread.c: 线程创建、互斥量、条件量等相关实现；如果系统已支持 POSIX 接口规范，则不用修改
