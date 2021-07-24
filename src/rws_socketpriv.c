@@ -77,26 +77,35 @@ void rws_socket_inform_recvd_frames(rws_socket s)
             //if (frame->is_finished) {
                 switch (frame->opcode) {
                 case rws_opcode_continuation:
-                    if (s->on_recvd_bin) {
+                    if (s->prev_opcode == rws_opcode_binary_frame && s->on_recvd_bin) {
                         s->on_recvd_bin(s, frame->data, (unsigned int)frame->data_size, frame->is_finished);
+                    } else if (s->prev_opcode == rws_opcode_text_frame && s->on_recvd_text) {
+                        s->on_recvd_text(s, (const char *)frame->data, (unsigned int)frame->data_size, frame->is_finished);
+                    } else {
+                        RWS_ERR("%s-%d: invalid opcode for continuous frame\n", __func__, __LINE__);
                     }
                     break;
                 case rws_opcode_text_frame:
                     if (s->on_recvd_text) {
                         s->on_recvd_text(s, (const char *)frame->data, (unsigned int)frame->data_size, frame->is_finished);
                     }
+                    s->prev_opcode = rws_opcode_text_frame;
                     break;
                 case rws_opcode_binary_frame:
                     if (s->on_recvd_bin) {
                         s->on_recvd_bin(s, frame->data, (unsigned int)frame->data_size, frame->is_finished);
                     }
+                    s->prev_opcode = rws_opcode_binary_frame;
                     break;
                 case rws_opcode_pong:
                     if (s->on_recvd_pong) {
                         s->on_recvd_pong(s);
                     }
+                    s->prev_opcode = rws_opcode_pong;
                     break;
-                default: break;
+                default:
+                    s->prev_opcode = rws_opcode_pong;
+                    break;
                 }
                 rws_frame_delete(frame);
                 cur->value.object = NULL;

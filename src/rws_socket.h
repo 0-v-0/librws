@@ -94,6 +94,7 @@ struct rws_socket_struct {
     rws_on_socket_recvd_bin on_recvd_bin;
     rws_on_socket_recvd_pong on_recvd_pong;
     rws_on_socket_send_ping  on_send_ping;
+    rws_opcode prev_opcode;
 
     void * received;
     size_t received_size; // size of 'received' memory
