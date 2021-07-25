@@ -30,7 +30,7 @@
 #include <stdio.h>
 
 //#define RWS_SSL_ENABLE
-#define RWS_DEBUG_ENABLE
+//#define RWS_DEBUG_ENABLE
 
 #if defined(RWS_DEBUG_ENABLE)
 #define RWS_DBG(format, arg...)  fprintf(stdout, format, ##arg)
