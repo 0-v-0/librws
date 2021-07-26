@@ -242,7 +242,6 @@ rws_bool rws_socket_recv(rws_socket s)
     int is_reading = 1, error_number = -1, len = -1;
     char * received = NULL;
     size_t total_len = 0;
-    char buff[8192];
 #ifdef RWS_SSL_ENABLE
     rws_bool ssl_enable = rws_false;
     rws_bool ssl_status = rws_false;
@@ -254,7 +253,7 @@ rws_bool rws_socket_recv(rws_socket s)
         if(s->scheme && strcmp(s->scheme, "wss") == 0) {
             ssl_enable = rws_true;
             if (s->ssl) {
-                len = rws_ssl_recv(s, (unsigned char *)buff, sizeof(buff));
+                len = rws_ssl_recv(s, (unsigned char *)s->recvd_buff, s->recvd_buff_len);
             } else {
                 RWS_ERR("%s-%d: invalid ssl context\n", __func__, __LINE__);
                 return rws_false;
@@ -263,7 +262,7 @@ rws_bool rws_socket_recv(rws_socket s)
         else
 #endif
         {
-            len = (int)recv(s->socket, buff, sizeof(buff), 0);
+            len = (int)recv(s->socket, s->recvd_buff, s->recvd_buff_len, 0);
         }
 #if defined(RWS_OS_WINDOWS)
         error_number = WSAGetLastError();
@@ -279,7 +278,7 @@ rws_bool rws_socket_recv(rws_socket s)
             if (s->received_len) {
                 received += s->received_len;
             }
-            memcpy(received, buff, len);
+            memcpy(received, s->recvd_buff, len);
             s->received_len += len;
         } else if (len == 0) {
             is_reading = 0;

@@ -103,6 +103,9 @@ struct rws_socket_struct {
     _rws_list * send_frames;
     _rws_list * recvd_frames;
 
+    char * recvd_buff;
+    size_t recvd_buff_len;
+
     rws_error error;
 
     _rws_mutex work_mutex;

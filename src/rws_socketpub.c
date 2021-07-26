@@ -29,6 +29,8 @@
 #include "rws_memory.h"
 #include "rws_string.h"
 
+#define RWS_RECVD_BUFF_LEN      8192
+
 // public
 rws_bool rws_socket_connect(rws_socket socket)
 {
@@ -131,6 +133,9 @@ rws_socket rws_socket_create(void)
     s->socket = RWS_INVALID_SOCKET;
     s->command = COMMAND_NONE;
 
+    s->recvd_buff_len = RWS_RECVD_BUFF_LEN;
+    s->recvd_buff = (char *)rws_malloc(s->recvd_buff_len);
+
     s->work_mutex = rws_mutex_create_recursive();
     s->send_mutex = rws_mutex_create_recursive();
     s->work_cond = rws_cond_create();
@@ -162,6 +167,7 @@ void rws_socket_delete(rws_socket s)
     rws_mutex_delete(s->send_mutex);
     rws_cond_delete(s->work_cond);
 
+    rws_free(s->recvd_buff);
     rws_free(s);
 }
 
