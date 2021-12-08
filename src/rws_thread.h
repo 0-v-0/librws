@@ -62,6 +62,8 @@ void rws_mutex_unlock(_rws_mutex mutex);
  */
 void rws_mutex_delete(_rws_mutex mutex);
 
+#if !defined(RWS_OS_WINDOWS)
+
 /**
  @brief Creates condition object.
  */
@@ -81,6 +83,8 @@ void rws_cond_wait(_rws_cond cond, _rws_mutex mutex);
  @brief Release a condition
  */
 void rws_cond_delete(_rws_cond cond);
+
+#endif
 
 /**
  @brief Pause current thread for a number of milliseconds.

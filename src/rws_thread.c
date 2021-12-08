@@ -215,6 +215,7 @@ void rws_mutex_delete(_rws_mutex mutex)
     }
 }
 
+#if !defined(RWS_OS_WINDOWS)
 _rws_cond rws_cond_create(void)
 {
     int ret = -1;
@@ -249,4 +250,4 @@ void rws_cond_delete(_rws_cond cond)
         rws_free(cond);
     }
 }
-
+#endif

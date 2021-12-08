@@ -208,4 +208,3 @@ if(RWS_OPT_TESTS)
     # This must always be last!
     include(CPack)
 endif()
-

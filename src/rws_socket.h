@@ -110,8 +110,9 @@ struct rws_socket_struct {
 
     _rws_mutex work_mutex;
     _rws_mutex send_mutex;
+#if !defined(RWS_OS_WINDOWS)
     _rws_cond work_cond;
-
+#endif
 #ifdef RWS_SSL_ENABLE
     const char *server_cert;        /**< Server certification. */
     const char *client_cert;        /**< Client certification. */

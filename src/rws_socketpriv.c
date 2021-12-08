@@ -178,7 +178,7 @@ rws_bool rws_socket_process_handshake_responce(rws_socket s)
 
     if (http_code != 101 || !s->sec_ws_accept) {
         s->error = rws_error_new_code_descr(rws_error_code_parse_handshake,
-                (http_code != 101) ? "HTPP code not found or non 101" : "Accept key not found");
+                http_code != 101 ? "HTPP code not found or non 101" : "Accept key not found");
         return rws_false;
     }
     return rws_true;
@@ -520,7 +520,7 @@ void rws_socket_send_handshake(rws_socket s)
     char buff[512];
     char * ptr = buff;
     size_t writed = 0;
-    char * protocol = (s->sec_ws_protocol ? s->sec_ws_protocol : "chat, superchat");
+    char * protocol = s->sec_ws_protocol ? s->sec_ws_protocol : "chat, superchat";
     writed = rws_sprintf(ptr, 512, "GET %s HTTP/%s\r\n", s->path, k_rws_socket_min_http_ver);
 
     if (s->port == 80) {
@@ -750,7 +750,9 @@ static void rws_socket_work_th_func(void * user_object)
 
     rws_mutex_lock(s->work_mutex);
     s->work_thread = NULL;
+#if !defined(RWS_OS_WINDOWS)
     rws_cond_signal(s->work_cond);
+#endif
     rws_mutex_unlock(s->work_mutex);
 
     RWS_DBG("%s-%d: -- rws work leave --\n", __func__, __LINE__);
@@ -779,7 +781,7 @@ void rws_socket_resize_received(rws_socket s, const size_t size)
     res = rws_malloc(size);
     assert(res && (size > 0));
 
-    min = (s->received_size < size) ? s->received_size : size;
+    min = s->received_size < size ? s->received_size : size;
     if (min > 0 && s->received) {
         memcpy(res, s->received, min);
     }
@@ -924,7 +926,7 @@ void rws_socket_check_write_error(rws_socket s, int error_num)
 #endif
     }
 
-    code = (socket_code > 0) ? socket_code : error_num;
+    code = socket_code > 0 ? socket_code : error_num;
     if (code <= 0) {
         return;
     }
@@ -959,4 +961,3 @@ void rws_socket_check_write_error(rws_socket s, int error_num)
         break;
     }
 }
-

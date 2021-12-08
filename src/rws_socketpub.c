@@ -81,8 +81,10 @@ void rws_socket_disconnect_and_release(rws_socket socket)
         socket->command = COMMAND_END;
     }
 
+#if !defined(RWS_OS_WINDOWS)
     while (socket->work_thread)
         rws_cond_wait(socket->work_cond, socket->work_mutex);
+#endif
 
     rws_mutex_unlock(socket->work_mutex);
 
@@ -138,7 +140,10 @@ rws_socket rws_socket_create(void)
 
     s->work_mutex = rws_mutex_create_recursive();
     s->send_mutex = rws_mutex_create_recursive();
+
+#if !defined(RWS_OS_WINDOWS)
     s->work_cond = rws_cond_create();
+#endif
 
     return s;
 }
@@ -165,7 +170,9 @@ void rws_socket_delete(rws_socket s)
 
     rws_mutex_delete(s->work_mutex);
     rws_mutex_delete(s->send_mutex);
+#if !defined(RWS_OS_WINDOWS)
     rws_cond_delete(s->work_cond);
+#endif
 
     rws_free(s->recvd_buff);
     rws_free(s);
